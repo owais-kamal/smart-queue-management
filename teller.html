@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Teller Dashboard</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <h1>Teller Dashboard</h1>
+
+    <label>Enter Teller ID</label>
+    <input id="tellerId" placeholder="1">
+
+    <button id="pollBtn">Get Next Customer</button>
+
+    <div id="assigned" style="margin-top:15px;"></div>
+
+    <button id="completeBtn" style="display:none">Complete</button>
+  </div>
+
+  <div class="card">
+    <h2>All Tellers</h2>
+    <div id="tellersList"></div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+let currentTicket = null;
+
+document.getElementById("pollBtn").onclick = async () => {
+  const id = document.getElementById("tellerId").value;
+
+  const res = await fetch(`/api/teller/${id}/next`);
+  const t = await res.json();
+
+  if (t && t.id) {
+    currentTicket = t;
+    document.getElementById("assigned").innerHTML =
+      `Token: <span class="ticket">${t.token}</span><br>
+       Name: ${t.name}<br>
+       Service: ${t.service_type}`;
+    document.getElementById("completeBtn").style.display = "block";
+  } else {
+    document.getElementById("assigned").innerText = "No waiting customer.";
+  }
+
+  loadTellers();
+};
+
+document.getElementById("completeBtn").onclick = async () => {
+  const id = document.getElementById("tellerId").value;
+
+  await fetch(`/api/teller/${id}/complete`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ticket_id: currentTicket.id})
+  });
+
+  currentTicket = null;
+  document.getElementById("assigned").innerText = "Completed!";
+  document.getElementById("completeBtn").style.display = "none";
+
+  loadTellers();
+};
+
+loadTellers();
+setInterval(loadTellers, 5000);
+</script>
+
+</body>
+</html>

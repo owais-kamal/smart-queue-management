@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<div class="container">
+  <div class="card">
+    <h1>Admin Panel</h1>
+
+    <h3>Create Teller</h3>
+    <input id="tellerName" placeholder="Teller Name">
+    <input id="tellerSkill" placeholder="deposit,withdraw">
+    <button id="createBtn">Create</button>
+
+    <hr>
+
+    <h3>Queue Overview</h3>
+    <table class="table" id="adminQueue">
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>Name</th>
+          <th>Service</th>
+          <th>Est</th>
+          <th>Status</th>
+          <th>Teller</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+document.getElementById("createBtn").onclick = async () => {
+  const name = document.getElementById("tellerName").value;
+  const skill = document.getElementById("tellerSkill").value;
+
+  await fetch("/api/tellers", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({name, skill})
+  });
+
+  loadQueue();
+};
+
+loadQueue();
+setInterval(loadQueue, 5000);
+</script>
+
+</body>
+</html>
